@@ -31,7 +31,8 @@ const KEYS = {
 // Funções para aniversários
 export async function getBirthdays(): Promise<UserBirthday[]> {
     const result = await db.get(KEYS.BIRTHDAYS);
-    return result || [];
+    if (!result) return [];
+    return Array.isArray(result) ? result : [];
 }
 
 export async function saveBirthdays(birthdays: UserBirthday[]): Promise<void> {
@@ -67,7 +68,8 @@ export async function getBirthdayByUserId(userId: string): Promise<UserBirthday 
 // Funções para notificações
 export async function getNotifications(): Promise<BirthdayNotification[]> {
     const result = await db.get(KEYS.NOTIFICATIONS);
-    return result || [];
+    if (!result) return [];
+    return Array.isArray(result) ? result : [];
 }
 
 export async function saveNotifications(notifications: BirthdayNotification[]): Promise<void> {

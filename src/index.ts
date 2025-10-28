@@ -11,8 +11,8 @@ import {
     getBirthdayChannelData,
     getBirthdayChannelExecute,
     BirthdayChecker
-} from './commands/index.js';
-import { migrateFromJSON } from './utils/database.js';
+} from './commands/index';
+import { migrateFromJSON } from './utils/database';
 
 const client = new Client({ 
     intents: [
