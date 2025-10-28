@@ -123,10 +123,13 @@ bot-aniversario/
 │   └── index.ts               # Exportações dos comandos
 ├── src/
 │   └── index.ts               # Arquivo principal do bot
-├── data/                      # Banco de dados JSON (criado automaticamente)
-│   ├── birthdays.json         # Dados dos usuários
-│   ├── notifications.json     # Controle de notificações
-│   └── config.json            # Configuração do canal de aniversários
+├── data/                      # Banco de dados JSON (backup/migração)
+│   ├── birthdays.json         # Dados dos usuários (backup)
+│   ├── notifications.json     # Controle de notificações (backup)
+│   └── config.json            # Configuração do canal (backup)
+├── src/
+│   └── utils/
+│       └── database.ts        # Utilitários do Replit Database
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -134,10 +137,19 @@ bot-aniversario/
 
 ## 🔒 Banco de Dados
 
-O bot utiliza arquivos JSON para armazenar dados:
-- `birthdays.json`: Informações de aniversário dos usuários
-- `notifications.json`: Controle de notificações enviadas
-- `config.json`: Configuração do canal de aniversários
+O bot utiliza o **Replit Database** para armazenar dados de forma persistente e confiável:
+- **Aniversários**: Informações de aniversário dos usuários
+- **Notificações**: Controle de notificações enviadas
+- **Configuração**: Configuração do canal de aniversários
+
+### Migração Automática
+O bot automaticamente migra dados existentes dos arquivos JSON para o Replit Database na primeira execução. Os arquivos JSON originais são mantidos como backup.
+
+### Vantagens do Replit Database
+- ✅ Persistência garantida mesmo após reinicializações
+- ✅ Acesso rápido e confiável aos dados
+- ✅ Sem necessidade de gerenciar arquivos locais
+- ✅ Ideal para ambientes de produção
 
 ## 🎨 Personalização
 

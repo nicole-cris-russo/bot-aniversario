@@ -1,16 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
-
-interface UserBirthday {
-    userId: string;
-    day: number;
-    month: number;
-    year: number;
-    registeredAt: string;
-}
-
-const BIRTHDAY_DB_PATH = join(process.cwd(), 'data', 'birthdays.json');
+import { getBirthdayByUserId } from '../utils/database';
 
 export const data = new SlashCommandBuilder()
     .setName('ver_aniversario')
@@ -20,15 +9,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const userId = interaction.user.id;
 
     try {
-        // Carregar banco de dados existente
-        let birthdays: UserBirthday[] = [];
-        if (existsSync(BIRTHDAY_DB_PATH)) {
-            const data = readFileSync(BIRTHDAY_DB_PATH, 'utf-8');
-            birthdays = JSON.parse(data);
-        }
-
         // Procurar usuário
-        const userBirthday = birthdays.find(b => b.userId === userId);
+        const userBirthday = await getBirthdayByUserId(userId);
         if (!userBirthday) {
             return await interaction.reply({
                 content: '❌ Você não possui uma data de aniversário registrada! Use `/registrar_aniversario` para registrar.',

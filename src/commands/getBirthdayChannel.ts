@@ -1,13 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
-
-const CONFIG_DB_PATH = join(process.cwd(), 'data', 'config.json');
-
-interface BotConfig {
-    birthdayChannelId: string | null;
-    guildId: string | null;
-}
+import { getConfig } from '../utils/database';
 
 export const data = new SlashCommandBuilder()
     .setName('getbirthdaychannel')
@@ -16,15 +8,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: any) {
     try {
         // Carregar configuração
-        let config: BotConfig = {
-            birthdayChannelId: null,
-            guildId: null
-        };
-
-        if (existsSync(CONFIG_DB_PATH)) {
-            const data = readFileSync(CONFIG_DB_PATH, 'utf-8');
-            config = JSON.parse(data);
-        }
+        const config = await getConfig();
 
         if (!config.birthdayChannelId) {
             return await interaction.reply({

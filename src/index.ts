@@ -13,6 +13,7 @@ import {
     getBirthdayChannelExecute,
     BirthdayChecker
 } from './commands/index';
+import { migrateFromJSON } from './utils/database';
 
 dotenv.config();
 
@@ -45,6 +46,13 @@ let birthdayChecker: BirthdayChecker;
 
 client.once(Events.ClientReady, async () => {
     console.log(`✅ Logged in as ${client.user?.tag}`);
+    
+    // Migrar dados do JSON para o Replit Database
+    try {
+        await migrateFromJSON();
+    } catch (error) {
+        console.error('❌ Erro durante a migração:', error);
+    }
     
     // Inicializar verificador de aniversários
     birthdayChecker = new BirthdayChecker(client);

@@ -1,28 +1,5 @@
 import { Client, EmbedBuilder } from 'discord.js';
-import { readFileSync, existsSync, writeFileSync } from 'fs';
-import { join } from 'path';
-
-interface UserBirthday {
-    userId: string;
-    day: number;
-    month: number;
-    year: number;
-    registeredAt: string;
-}
-
-interface BirthdayNotification {
-    userId: string;
-    lastNotified: string;
-}
-
-interface BotConfig {
-    birthdayChannelId: string | null;
-    guildId: string | null;
-}
-
-const BIRTHDAY_DB_PATH = join(process.cwd(), 'data', 'birthdays.json');
-const NOTIFICATION_DB_PATH = join(process.cwd(), 'data', 'notifications.json');
-const CONFIG_DB_PATH = join(process.cwd(), 'data', 'config.json');
+import { getBirthdays, getNotifications, updateNotification, getConfig } from '../utils/database';
 
 const BIRTHDAY_MESSAGES_WITH_GIFS = [
     {
@@ -119,18 +96,10 @@ export class BirthdayChecker {
             const currentMonth = today.getMonth() + 1; // getMonth() retorna 0-11
 
             // Carregar banco de dados de aniversários
-            let birthdays: UserBirthday[] = [];
-            if (existsSync(BIRTHDAY_DB_PATH)) {
-                const data = readFileSync(BIRTHDAY_DB_PATH, 'utf-8');
-                birthdays = JSON.parse(data);
-            }
+            const birthdays = await getBirthdays();
 
             // Carregar banco de dados de notificações
-            let notifications: BirthdayNotification[] = [];
-            if (existsSync(NOTIFICATION_DB_PATH)) {
-                const data = readFileSync(NOTIFICATION_DB_PATH, 'utf-8');
-                notifications = JSON.parse(data);
-            }
+            const notifications = await getNotifications();
 
             // Encontrar usuários com aniversário hoje
             const todayBirthdays = birthdays.filter(birthday => 
@@ -150,41 +119,18 @@ export class BirthdayChecker {
                 await this.sendBirthdayMessage(birthday);
 
                 // Atualizar registro de notificação
-                if (lastNotification) {
-                    lastNotification.lastNotified = todayString;
-                } else {
-                    notifications.push({
-                        userId: birthday.userId,
-                        lastNotified: todayString
-                    });
-                }
+                await updateNotification(birthday.userId, todayString);
             }
-
-            // Salvar notificações atualizadas
-            const dataDir = join(process.cwd(), 'data');
-            if (!existsSync(dataDir)) {
-                const { mkdirSync } = await import('fs');
-                mkdirSync(dataDir, { recursive: true });
-            }
-            writeFileSync(NOTIFICATION_DB_PATH, JSON.stringify(notifications, null, 2));
 
         } catch (error) {
             console.error('Erro ao verificar aniversários:', error);
         }
     }
 
-    private async sendBirthdayMessage(birthday: UserBirthday) {
+    private async sendBirthdayMessage(birthday: any) {
         try {
             // Carregar configuração do canal
-            let config: BotConfig = {
-                birthdayChannelId: null,
-                guildId: null
-            };
-
-            if (existsSync(CONFIG_DB_PATH)) {
-                const data = readFileSync(CONFIG_DB_PATH, 'utf-8');
-                config = JSON.parse(data);
-            }
+            const config = await getConfig();
 
             // Verificar se há canal configurado
             if (!config.birthdayChannelId || !config.guildId) {

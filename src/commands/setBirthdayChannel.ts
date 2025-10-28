@@ -1,13 +1,5 @@
 import { SlashCommandBuilder, PermissionFlagsBits, ChannelType } from 'discord.js';
-import { readFileSync, existsSync, writeFileSync } from 'fs';
-import { join } from 'path';
-
-const CONFIG_DB_PATH = join(process.cwd(), 'data', 'config.json');
-
-interface BotConfig {
-    birthdayChannelId: string | null;
-    guildId: string | null;
-}
+import { getConfig, saveConfig } from '../utils/database';
 
 export const data = new SlashCommandBuilder()
     .setName('setbirthdaychannel')
@@ -44,28 +36,17 @@ export async function execute(interaction: any) {
         }
 
         // Carregar configuração atual
-        let config: BotConfig = {
-            birthdayChannelId: null,
-            guildId: null
-        };
-
-        if (existsSync(CONFIG_DB_PATH)) {
-            const data = readFileSync(CONFIG_DB_PATH, 'utf-8');
-            config = JSON.parse(data);
-        }
+        const config = await getConfig();
 
         // Atualizar configuração
-        config.birthdayChannelId = channel.id;
-        config.guildId = interaction.guild.id;
+        const updatedConfig = {
+            ...config,
+            birthdayChannelId: channel.id,
+            guildId: interaction.guild.id
+        };
 
         // Salvar configuração
-        const dataDir = join(process.cwd(), 'data');
-        if (!existsSync(dataDir)) {
-            const { mkdirSync } = await import('fs');
-            mkdirSync(dataDir, { recursive: true });
-        }
-        
-        writeFileSync(CONFIG_DB_PATH, JSON.stringify(config, null, 2));
+        await saveConfig(updatedConfig);
 
         await interaction.reply({
             content: `✅ Canal de aniversários configurado com sucesso!\n📢 As notificações de aniversário serão enviadas em: ${channel}`,
