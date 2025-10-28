@@ -57,7 +57,18 @@ The bot requires the following intents to be enabled in the Discord Developer Po
 The bot runs automatically via the configured workflow using `npm run dev`.
 
 ## Recent Changes
-- 2025-10-28: Initial setup in Replit environment
-  - Installed @types/node for TypeScript support
-  - Configured workflow for automatic bot startup
-  - Set up Discord bot token via Replit Secrets
+- 2025-10-28: Migração completa para Replit Database
+  - Migrado sistema de armazenamento de arquivos JSON para Replit Database
+  - Implementado sistema de migração automática de dados
+  - Removida dependência do dotenv (não necessária no Replit)
+  - Atualizado para usar tsx em vez de ts-node para melhor suporte ESM
+  - Bot está rodando com sucesso com todos os dados migrados
+  - Configurado workflow para inicialização automática do bot
+
+## Database
+O bot agora utiliza o **Replit Database** (Key-Value Store) para armazenar:
+- Aniversários dos usuários (chave: `birthdays`)
+- Notificações enviadas (chave: `notifications`)
+- Configurações do bot (chave: `config`)
+
+A migração dos arquivos JSON antigos para o Replit Database acontece automaticamente na primeira execução.
