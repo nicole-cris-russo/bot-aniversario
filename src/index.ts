@@ -1,5 +1,4 @@
 import { Client, GatewayIntentBits, Collection, Events, REST, Routes } from 'discord.js';
-import dotenv from 'dotenv';
 import { 
     registerBirthdayData, 
     registerBirthdayExecute,
@@ -12,10 +11,8 @@ import {
     getBirthdayChannelData,
     getBirthdayChannelExecute,
     BirthdayChecker
-} from './commands/index';
-import { migrateFromJSON } from './utils/database';
-
-dotenv.config();
+} from './commands/index.js';
+import { migrateFromJSON } from './utils/database.js';
 
 const client = new Client({ 
     intents: [

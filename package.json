@@ -13,8 +13,7 @@
   "dependencies": {
     "@replit/database": "^3.0.1",
     "@types/node": "^24.9.1",
-    "discord.js": "^14.24.0",
-    "dotenv": "^17.2.3"
+    "discord.js": "^14.24.0"
   },
   "devDependencies": {
     "@types/typescript": "^0.4.29",
