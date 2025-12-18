@@ -1,24 +1,6 @@
+import { BirthdayNotification, BotConfig, UserBirthday } from "@/types";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
-
-// Interfaces
-export interface UserBirthday {
-    userId: string;
-    day: number;
-    month: number;
-    year: number;
-    registeredAt: string;
-}
-
-export interface BirthdayNotification {
-    userId: string;
-    lastNotified: string;
-}
-
-export interface BotConfig {
-    birthdayChannelId: string | null;
-    guildId: string | null;
-}
 
 // Caminho para a pasta de dados
 const DATA_DIR = join(process.cwd(), "data");

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
-import { getBirthdays, addBirthday, getBirthdayByUserId } from '../utils/database';
+import { addBirthday, getBirthdayByUserId } from '../utils/database';
 
 export const data = new SlashCommandBuilder()
     .setName('registrar_aniversario')

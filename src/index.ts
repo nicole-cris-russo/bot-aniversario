@@ -7,6 +7,10 @@ import {
     updateBirthdayExecute,
     checkBirthdayData,
     checkBirthdayExecute,
+    checkListBirthdayData,
+    checkListBirthdayExecute,
+    listaComandosData,
+    listaComandosExecute,
     setBirthdayChannelData,
     setBirthdayChannelExecute,
     getBirthdayChannelData,
@@ -36,6 +40,8 @@ const commands = new Collection<string, Command>();
 commands.set(registerBirthdayData.name, { data: registerBirthdayData, execute: registerBirthdayExecute });
 commands.set(updateBirthdayData.name, { data: updateBirthdayData, execute: updateBirthdayExecute });
 commands.set(checkBirthdayData.name, { data: checkBirthdayData, execute: checkBirthdayExecute });
+commands.set(checkListBirthdayData.name, { data: checkListBirthdayData, execute: checkListBirthdayExecute });
+commands.set(listaComandosData.name, { data: listaComandosData, execute: listaComandosExecute });
 commands.set(setBirthdayChannelData.name, { data: setBirthdayChannelData, execute: setBirthdayChannelExecute });
 commands.set(getBirthdayChannelData.name, { data: getBirthdayChannelData, execute: getBirthdayChannelExecute });
 

@@ -3,6 +3,26 @@ import { getBirthdays, getNotifications, updateNotification, getConfig } from '.
 
 const BIRTHDAY_MESSAGES_WITH_GIFS = [
     {
+        message: "🎪 Muitos parabéns! Você está oficialmente mais experiente em cometer os mesmos erros de sempre!",
+        gif: "https://i.redd.it/54sr4nsssq371.gif"
+    },
+    {
+        message: "🌟 Feliz aniversário! A vida te deu mais 365 dias pra continuar fingindo que sabe o que tá fazendo — sucesso!",
+        gif: "https://i.pinimg.com/originals/35/1c/8a/351c8a0fbabdc2196e3e1542e5335c2f.gif"
+    },
+    {
+        message: "🎈 Muitos parabéns! Você está oficialmente mais velho e mais sábio (ou pelo menos mais velho)!",
+        gif: "https://media.tenor.com/tPWIqdustusAAAAM/rei-dancing.gif"
+    },
+    {
+        message: "🎭 Parabéns! Você tá tipo um jogo indie: caótico, cheio de charme e ninguém entende direito a história.",
+        gif: "https://i.pinimg.com/1200x/f8/a4/92/f8a492643a7bcda08148faea327a063b.jpg"
+    },
+    {
+        message: "🎂 Feliz aniversário! Hoje é o dia perfeito para refletir sobre todas as decisões questionáveis que te trouxeram até aqui!",
+        gif: "https://pa1.aminoapps.com/5874/38ba8eb66e135aeb7136956a2ce5b0a0b83d30e8_hq.gif"
+    },
+    {
         message: "🎉 Parabéns! Você sobreviveu mais um ano... mas lembre-se: the cake is a lie! 🍰",
         gif: "https://media.tenor.com/BK9yDFxI2vgAAAAM/aperture-science-portal.gif"
     },
@@ -15,24 +35,12 @@ const BIRTHDAY_MESSAGES_WITH_GIFS = [
         gif: "https://i.pinimg.com/originals/d0/3d/69/d03d69dbafb4dc8d13d082b327c2bcd5.gif"
     },
     {
-        message: "🌟 Feliz aniversário! A vida te deu mais 365 dias pra continuar fingindo que sabe o que tá fazendo — sucesso!",
-        gif: "https://i.pinimg.com/originals/35/1c/8a/351c8a0fbabdc2196e3e1542e5335c2f.gif"
-    },
-    {
         message: "🎁 Feliz aniversário! Que seu dia tenha menos bugs e mais cutscenes agradáveis.",
         gif: "https://i.pinimg.com/originals/95/b6/e4/95b6e46cdf26dfb2e8b898f21d98f912.gif"
     },
     {
         message: "🎪 Parabéns! Envelhecer é tipo atualizar o sistema: promete melhorias, mas deixa tudo mais lento.",
         gif: "https://i.pinimg.com/originals/da/36/63/da3663c176a175053a93bee0a91553e1.gif"
-    },
-    {
-        message: "🎈 Muitos parabéns! Você está oficialmente mais velho e mais sábio (ou pelo menos mais velho)!",
-        gif: "https://media.tenor.com/tPWIqdustusAAAAM/rei-dancing.gif"
-    },
-    {
-        message: "🎭 Parabéns! Você tá tipo um jogo indie: caótico, cheio de charme e ninguém entende direito a história.",
-        gif: "https://i.pinimg.com/1200x/f8/a4/92/f8a492643a7bcda08148faea327a063b.jpg"
     },
     {
         message: "🍰 Feliz aniversário! Que seu bolo tenha mais camadas que uma missão do Elden Ring.",
@@ -47,16 +55,8 @@ const BIRTHDAY_MESSAGES_WITH_GIFS = [
         gif: "https://www.picgifs.com/glitter-gifs/h/happy-birthday/picgifs-happy-birthday-418491.gif"
     },
     {
-        message: "🎂 Feliz aniversário! Hoje é o dia perfeito para refletir sobre todas as decisões questionáveis que te trouxeram até aqui!",
-        gif: "https://pa1.aminoapps.com/5874/38ba8eb66e135aeb7136956a2ce5b0a0b83d30e8_hq.gif"
-    },
-    {
         message: "🎉 Parabéns! Você ganhou o direito de usar a frase 'na minha época' com mais propriedade!",
         gif: "https://greeting-cards.yolasite.com/resources/900956t6ykasplyr.gif"
-    },
-    {
-        message: "🎪 Muitos parabéns! Você está oficialmente mais experiente em cometer os mesmos erros de sempre!",
-        gif: "https://i.redd.it/54sr4nsssq371.gif"
     },
     {
         message: "🎯 Muitos parabéns! Você sobreviveu mais um ano sem ser cancelado nas redes sociais!",
@@ -67,6 +67,7 @@ const BIRTHDAY_MESSAGES_WITH_GIFS = [
 export class BirthdayChecker {
     private client: Client;
     private checkInterval: NodeJS.Timeout | null = null;
+    private currentMessageIndex: number = 0; // Índice da próxima mensagem a ser usada
 
     constructor(client: Client) {
         this.client = client;
@@ -173,27 +174,40 @@ export class BirthdayChecker {
                 age--;
             }
 
-            // Selecionar mensagem e GIF aleatórios (agora combinados)
-            const randomBirthday = BIRTHDAY_MESSAGES_WITH_GIFS[Math.floor(Math.random() * BIRTHDAY_MESSAGES_WITH_GIFS.length)];
-            const randomMessage = randomBirthday.message;
-            const randomGif = randomBirthday.gif;
+            // Buscar informações do usuário
+            let userName = `ID: ${birthday.userId}`;
+            try {
+                const user = await this.client.users.fetch(birthday.userId);
+                userName = user.displayName || user.username;
+            } catch (error) {
+                console.log(`Não foi possível buscar o usuário ${birthday.userId}`);
+            }
+
+            // Selecionar mensagem e GIF de forma sequencial
+            const currentBirthday = BIRTHDAY_MESSAGES_WITH_GIFS[this.currentMessageIndex];
+            const randomMessage = currentBirthday.message;
+            const randomGif = currentBirthday.gif;
+            
+            // Avançar para a próxima mensagem (volta ao início quando chegar ao final)
+            this.currentMessageIndex = (this.currentMessageIndex + 1) % BIRTHDAY_MESSAGES_WITH_GIFS.length;
 
             // Criar embed de aniversário
             const embed = new EmbedBuilder()
                 .setColor('#FF69B4')
-                .setTitle('🎉 FELIZ ANIVERSÁRIO! 🎉')
-                .setDescription(`**${randomMessage}**`)
+                .setTitle(`🎉 HOJE É O DIA DO SEU ANIVERSÁRIO! 🎉`)
                 .addFields(
-                    { name: '🎂 Aniversariante', value: `<@${birthday.userId}>`, inline: true },
-                    { name: '🎊 Idade', value: `${age} anos`, inline: true },
-                    { name: '📅 Data', value: `${birthday.day.toString().padStart(2, '0')}/${birthday.month.toString().padStart(2, '0')}`, inline: true }
+                    // { name: `👤 Dados do Personagem:`, value: '\u200b', inline: false },
+                    { name: `⭐ Nickname:`, value:`${userName}`, inline: true },
+                    { name: `🆙 Subiu para o nível:`, value: `${age}`, inline: true },
+                    { name: `📜 Foi criado em:`, value: `${birthday.day.toString().padStart(2, '0')}/${birthday.month.toString().padStart(2, '0')}/${birthday.year}`, inline: true }
                 )
+                .setDescription(`**${randomMessage}**`)
                 .setImage(randomGif)
                 .setTimestamp()
-                .setFooter({ text: 'Bot de Aniversário - Parabéns!' });
+                .setFooter({ text: `Aviso: Não esqueça de parabenizar o amiguinho!` });
 
             // Enviar mensagem no canal configurado
-            await channel.send({ embeds: [embed] });
+            await channel.send({ content: '@everyone', embeds: [embed] });
             console.log(`Mensagem de aniversário enviada para ${channel.name} no servidor ${guild.name}`);
 
         } catch (error) {
