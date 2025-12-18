@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import { getConfig } from '../utils/database';
 
 export const data = new SlashCommandBuilder()
-    .setName('getbirthdaychannel')
+    .setName('mostrar_canal_de_notificacoes')
     .setDescription('Mostra qual canal está configurado para notificações de aniversário');
 
 export async function execute(interaction: any) {
@@ -12,7 +12,7 @@ export async function execute(interaction: any) {
 
         if (!config.birthdayChannelId) {
             return await interaction.reply({
-                content: '❌ Nenhum canal de aniversários foi configurado ainda!\nUse `/setbirthdaychannel` para configurar um canal.',
+                content: '❌ Nenhum canal de aniversários foi configurado ainda!\nUse `/canal_de_notificacoes` para configurar um canal.',
                 ephemeral: true
             });
         }
@@ -22,7 +22,7 @@ export async function execute(interaction: any) {
         
         if (!channel) {
             return await interaction.reply({
-                content: '❌ O canal configurado não existe mais ou foi deletado!\nUse `/setbirthdaychannel` para configurar um novo canal.',
+                content: '❌ O canal configurado não existe mais ou foi deletado!\nUse `/canal_de_notificacoes` para configurar um novo canal.',
                 ephemeral: true
             });
         }

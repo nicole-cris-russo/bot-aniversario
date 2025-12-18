@@ -41,8 +41,8 @@ bot-aniversario/
 - `/registrar_aniversario` - Register your birthday
 - `/atualizar_aniversario` - Update your birthday
 - `/ver_aniversario` - Check your registered birthday
-- `/setbirthdaychannel` - Set the birthday notification channel (admin only)
-- `/getbirthdaychannel` - View the configured notification channel
+- `/canal_de_notificacoes` - Set the birthday notification channel (admin only)
+- `/mostrar_canal_de_notificacoes` - View the configured notification channel
 
 ## Environment Setup
 - **TOKEN**: Discord bot token (required)
