@@ -11,10 +11,6 @@ const BIRTHDAY_MESSAGES_WITH_GIFS = [
         gif: "https://i.pinimg.com/originals/35/1c/8a/351c8a0fbabdc2196e3e1542e5335c2f.gif"
     },
     {
-        message: "🎈 Muitos parabéns! Você está oficialmente mais velho e mais sábio (ou pelo menos mais velho)!",
-        gif: "https://media.tenor.com/tPWIqdustusAAAAM/rei-dancing.gif"
-    },
-    {
         message: "🎭 Parabéns! Você tá tipo um jogo indie: caótico, cheio de charme e ninguém entende direito a história.",
         gif: "https://i.pinimg.com/1200x/f8/a4/92/f8a492643a7bcda08148faea327a063b.jpg"
     },
@@ -23,51 +19,22 @@ const BIRTHDAY_MESSAGES_WITH_GIFS = [
         gif: "https://pa1.aminoapps.com/5874/38ba8eb66e135aeb7136956a2ce5b0a0b83d30e8_hq.gif"
     },
     {
-        message: "🎉 Parabéns! Você sobreviveu mais um ano... mas lembre-se: the cake is a lie! 🍰",
-        gif: "https://media.tenor.com/BK9yDFxI2vgAAAAM/aperture-science-portal.gif"
-    },
-    {
-        message: "🎂 Feliz aniversário! Você escolheu a pílula vermelha e agora está mais um ano na Matrix! 🔴",
-        gif: "https://i.pinimg.com/originals/8f/79/01/8f7901e35f159be3521b1a4a04912628.gif"
-    },
-    {
-        message: "🎊 Subiu de nível! Mas o custo de mana pra levantar da cama aumentou.",
-        gif: "https://i.pinimg.com/originals/d0/3d/69/d03d69dbafb4dc8d13d082b327c2bcd5.gif"
-    },
-    {
         message: "🎁 Feliz aniversário! Que seu dia tenha menos bugs e mais cutscenes agradáveis.",
         gif: "https://i.pinimg.com/originals/95/b6/e4/95b6e46cdf26dfb2e8b898f21d98f912.gif"
-    },
-    {
-        message: "🎪 Parabéns! Envelhecer é tipo atualizar o sistema: promete melhorias, mas deixa tudo mais lento.",
-        gif: "https://i.pinimg.com/originals/da/36/63/da3663c176a175053a93bee0a91553e1.gif"
     },
     {
         message: "🍰 Feliz aniversário! Que seu bolo tenha mais camadas que uma missão do Elden Ring.",
         gif: "https://i.pinimg.com/originals/d5/43/e4/d543e4d6958a4c64eb45545de3c4ed6f.gif"
     },
     {
-        message: "🎊 Parabéns! Você está um ano mais próximo de poder reclamar do 'jovem de hoje em dia'!",
-        gif: "https://media0.giphy.com/media/oz03Vg3TapuUqtiJos/giphy.gif"
-    },
-    {
         message: "🎈 Muitos parabéns! Que você continue sendo a pessoa especial que é (mesmo que às vezes seja especial de um jeito diferente)!",
         gif: "https://www.picgifs.com/glitter-gifs/h/happy-birthday/picgifs-happy-birthday-418491.gif"
     },
-    {
-        message: "🎉 Parabéns! Você ganhou o direito de usar a frase 'na minha época' com mais propriedade!",
-        gif: "https://greeting-cards.yolasite.com/resources/900956t6ykasplyr.gif"
-    },
-    {
-        message: "🎯 Muitos parabéns! Você sobreviveu mais um ano sem ser cancelado nas redes sociais!",
-        gif: "https://i.pinimg.com/originals/4c/29/28/4c2928220ad9965425bfa8edbb63ea91.gif"
-    }
 ];
 
 export class BirthdayChecker {
     private client: Client;
     private checkInterval: NodeJS.Timeout | null = null;
-    private currentMessageIndex: number = 0; // Índice da próxima mensagem a ser usada
 
     constructor(client: Client) {
         this.client = client;
@@ -116,11 +83,15 @@ export class BirthdayChecker {
                     continue; // Já foi notificado hoje
                 }
 
-                // Enviar mensagem de aniversário
-                await this.sendBirthdayMessage(birthday);
+                // Enviar mensagem de aniversário e obter o índice da mensagem escolhida
+                const messageIndex = await this.sendBirthdayMessage(birthday);
 
-                // Atualizar registro de notificação
-                await updateNotification(birthday.userId, todayString);
+                // Atualizar registro de notificação com o índice da mensagem
+                if (messageIndex !== null) {
+                    await updateNotification(birthday.userId, todayString, messageIndex);
+                } else {
+                    await updateNotification(birthday.userId, todayString);
+                }
             }
 
         } catch (error) {
@@ -128,7 +99,56 @@ export class BirthdayChecker {
         }
     }
 
-    private async sendBirthdayMessage(birthday: any) {
+    /**
+     * Seleciona uma mensagem aleatória que ainda não foi enviada para o usuário.
+     * Se todas já foram enviadas, escolhe uma que foi enviada menos vezes.
+     * @param userId ID do usuário
+     * @returns Índice da mensagem selecionada
+     */
+    private selectRandomMessage(userId: string, notifications: any[]): number {
+        const userNotification = notifications.find(n => n.userId === userId);
+        const sentIndices = userNotification?.messageIndices || [];
+
+        // Contar quantas vezes cada mensagem foi enviada
+        const messageCounts: { [key: number]: number } = {};
+        sentIndices.forEach((index: number) => {
+            messageCounts[index] = (messageCounts[index] || 0) + 1;
+        });
+
+        // Encontrar mensagens que ainda não foram enviadas
+        const unsentIndices: number[] = [];
+        for (let i = 0; i < BIRTHDAY_MESSAGES_WITH_GIFS.length; i++) {
+            if (!messageCounts[i] || messageCounts[i] === 0) {
+                unsentIndices.push(i);
+            }
+        }
+
+        // Se há mensagens não enviadas, escolher uma aleatoriamente
+        if (unsentIndices.length > 0) {
+            const randomIndex = Math.floor(Math.random() * unsentIndices.length);
+            return unsentIndices[randomIndex];
+        }
+
+        // Se todas já foram enviadas, encontrar a que foi enviada menos vezes
+        let minCount = Infinity;
+        let leastUsedIndices: number[] = [];
+
+        for (let i = 0; i < BIRTHDAY_MESSAGES_WITH_GIFS.length; i++) {
+            const count = messageCounts[i] || 0;
+            if (count < minCount) {
+                minCount = count;
+                leastUsedIndices = [i];
+            } else if (count === minCount) {
+                leastUsedIndices.push(i);
+            }
+        }
+
+        // Escolher aleatoriamente entre as menos usadas
+        const randomIndex = Math.floor(Math.random() * leastUsedIndices.length);
+        return leastUsedIndices[randomIndex];
+    }
+
+    private async sendBirthdayMessage(birthday: any): Promise<number | null> {
         try {
             // Carregar configuração do canal
             const config = await getConfig();
@@ -136,34 +156,43 @@ export class BirthdayChecker {
             // Verificar se há canal configurado
             if (!config.birthdayChannelId || !config.guildId) {
                 console.log('Nenhum canal de aniversários configurado. Use /configurar_canal_de_notificacoes para configurar.');
-                return;
+                return null;
             }
 
             // Buscar o servidor e canal configurados
             const guild = this.client.guilds.cache.get(config.guildId);
             if (!guild) {
                 console.log('Servidor configurado não encontrado.');
-                return;
+                return null;
             }
 
             const channel = guild.channels.cache.get(config.birthdayChannelId);
             if (!channel || channel.type !== 0) {
                 console.log('Canal de aniversários configurado não encontrado ou não é um canal de texto.');
-                return;
+                return null;
             }
 
             // Verificar permissões
             const botMember = guild.members.me;
             if (!botMember) {
                 console.log('Bot não é membro do servidor configurado.');
-                return;
+                return null;
             }
             
             const channelPermissions = channel.permissionsFor(botMember);
             if (!channelPermissions?.has('SendMessages')) {
                 console.log('Bot não tem permissão para enviar mensagens no canal configurado.');
-                return;
+                return null;
             }
+
+            // Carregar notificações para selecionar mensagem não repetida
+            const notifications = await getNotifications();
+            const selectedMessageIndex = this.selectRandomMessage(birthday.userId, notifications);
+
+            // Selecionar mensagem e GIF aleatoriamente (sem repetir)
+            const selectedBirthday = BIRTHDAY_MESSAGES_WITH_GIFS[selectedMessageIndex];
+            const randomMessage = selectedBirthday.message;
+            const randomGif = selectedBirthday.gif;
 
             // Calcular idade
             const today = new Date();
@@ -183,25 +212,17 @@ export class BirthdayChecker {
                 console.log(`Não foi possível buscar o usuário ${birthday.userId}`);
             }
 
-            // Selecionar mensagem e GIF de forma sequencial
-            const currentBirthday = BIRTHDAY_MESSAGES_WITH_GIFS[this.currentMessageIndex];
-            const randomMessage = currentBirthday.message;
-            const randomGif = currentBirthday.gif;
-            
-            // Avançar para a próxima mensagem (volta ao início quando chegar ao final)
-            this.currentMessageIndex = (this.currentMessageIndex + 1) % BIRTHDAY_MESSAGES_WITH_GIFS.length;
-
             // Criar embed de aniversário
             const embed = new EmbedBuilder()
                 .setColor('#FF69B4')
-                .setTitle(`🎉 HOJE É O DIA DO SEU ANIVERSÁRIO! 🎉`)
+                .setTitle(`🎉 HOJE É O DIA DO SEU ANIVERSÁRIO ${userName}! 🎉`)
+                .setDescription(`**${randomMessage}**`)
                 .addFields(
                     // { name: `👤 Dados do Personagem:`, value: '\u200b', inline: false },
                     { name: `⭐ Nickname:`, value:`${userName}`, inline: true },
                     { name: `🆙 Subiu para o nível:`, value: `${age}`, inline: true },
                     { name: `📜 Foi criado em:`, value: `${birthday.day.toString().padStart(2, '0')}/${birthday.month.toString().padStart(2, '0')}/${birthday.year}`, inline: true }
                 )
-                .setDescription(`**${randomMessage}**`)
                 .setImage(randomGif)
                 .setTimestamp()
                 .setFooter({ text: `Aviso: Não esqueça de parabenizar o amiguinho!` });
@@ -210,8 +231,11 @@ export class BirthdayChecker {
             await channel.send({ content: '@everyone', embeds: [embed] });
             console.log(`Mensagem de aniversário enviada para ${channel.name} no servidor ${guild.name}`);
 
+            return selectedMessageIndex;
+
         } catch (error) {
             console.error('Erro ao enviar mensagem de aniversário:', error);
+            return null;
         }
     }
 }

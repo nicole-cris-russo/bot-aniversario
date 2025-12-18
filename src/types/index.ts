@@ -9,6 +9,7 @@ export interface UserBirthday {
 export interface BirthdayNotification {
     userId: string;
     lastNotified: string;
+    messageIndices?: number[]; // Array de índices das mensagens já enviadas para este usuário
 }
 
 export interface BotConfig {

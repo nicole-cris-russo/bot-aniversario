@@ -90,14 +90,26 @@ export async function saveNotifications(
 export async function updateNotification(
     userId: string,
     lastNotified: string,
+    messageIndex?: number,
 ): Promise<void> {
     const notifications = await getNotifications();
     const existing = notifications.find((n) => n.userId === userId);
 
     if (existing) {
         existing.lastNotified = lastNotified;
+        if (messageIndex !== undefined) {
+            if (!existing.messageIndices) {
+                existing.messageIndices = [];
+            }
+            existing.messageIndices.push(messageIndex);
+        }
     } else {
-        notifications.push({ userId, lastNotified });
+        const newNotification: BirthdayNotification = {
+            userId,
+            lastNotified,
+            messageIndices: messageIndex !== undefined ? [messageIndex] : [],
+        };
+        notifications.push(newNotification);
     }
 
     await saveNotifications(notifications);
