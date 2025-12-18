@@ -7,7 +7,7 @@ Um bot Discord que permite aos usuários registrar suas datas de aniversário e 
 - **Registro de Aniversário**: Comando `/registrar_aniversario` para registrar data de nascimento
 - **Atualização de Dados**: Comando `/atualizar_aniversario` para modificar data registrada
 - **Consulta de Dados**: Comando `/ver_aniversario` para verificar informações registradas
-- **Configuração de Canal**: Comando `/canal_de_notificacoes` para definir canal de notificações
+- **Configuração de Canal**: Comando `/configurar_canal_de_notificacoes` para definir canal de notificações
 - **Verificação de Canal**: Comando `/mostrar_canal_de_notificacoes` para ver canal configurado
 - **Mensagens Automáticas**: Notificações automáticas no dia do aniversário
 - **GIFs Aleatórios**: GIFs de anime dançando enviados junto com as mensagens
@@ -82,7 +82,7 @@ Atualiza sua data de aniversário registrada.
 ### `/ver_aniversario`
 Mostra suas informações de aniversário registradas.
 
-### `/canal_de_notificacoes`
+### `/configurar_canal_de_notificacoes`
 Configura o canal onde as notificações de aniversário serão enviadas.
 
 **Parâmetros:**
@@ -92,7 +92,7 @@ Configura o canal onde as notificações de aniversário serão enviadas.
 
 **Exemplo:**
 ```
-/canal_de_notificacoes canal:#aniversarios
+/configurar_canal_de_notificacoes canal:#aniversarios
 ```
 
 ### `/mostrar_canal_de_notificacoes`
@@ -107,7 +107,7 @@ O bot verifica automaticamente todos os dias se há usuários fazendo aniversár
 - Informações sobre idade e data
 - Notificação **apenas no canal configurado** (não mais em todos os canais)
 
-**⚠️ Importante:** Antes de usar o bot, configure um canal usando `/canal_de_notificacoes` para que as notificações funcionem corretamente.
+**⚠️ Importante:** Antes de usar o bot, configure um canal usando `/configurar_canal_de_notificacoes` para que as notificações funcionem corretamente.
 
 ## 📁 Estrutura do Projeto
 
@@ -174,7 +174,7 @@ Você pode personalizar:
 - Verifique se há erros no console
 
 ### Mensagens de aniversário não são enviadas
-- **Configure um canal primeiro**: Use `/canal_de_notificacoes` para definir onde as notificações devem ser enviadas
+- **Configure um canal primeiro**: Use `/configurar_canal_de_notificacoes` para definir onde as notificações devem ser enviadas
 - Verifique se o bot tem permissão para enviar mensagens no canal configurado
 - Confirme se a data está registrada corretamente
 - Verifique os logs do console para erros

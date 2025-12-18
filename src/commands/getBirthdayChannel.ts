@@ -12,7 +12,7 @@ export async function execute(interaction: any) {
 
         if (!config.birthdayChannelId) {
             return await interaction.reply({
-                content: '❌ Nenhum canal de aniversários foi configurado ainda!\nUse `/canal_de_notificacoes` para configurar um canal.',
+                content: '❌ Nenhum canal de aniversários foi configurado ainda!\nUse `/configurar_canal_de_notificacoes` para configurar um canal.',
                 ephemeral: true
             });
         }
@@ -22,7 +22,7 @@ export async function execute(interaction: any) {
         
         if (!channel) {
             return await interaction.reply({
-                content: '❌ O canal configurado não existe mais ou foi deletado!\nUse `/canal_de_notificacoes` para configurar um novo canal.',
+                content: '❌ O canal configurado não existe mais ou foi deletado!\nUse `/configurar_canal_de_notificacoes` para configurar um novo canal.',
                 ephemeral: true
             });
         }

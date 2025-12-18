@@ -2,7 +2,7 @@ import { SlashCommandBuilder, PermissionFlagsBits, ChannelType } from 'discord.j
 import { getConfig, saveConfig } from '../utils/database';
 
 export const data = new SlashCommandBuilder()
-    .setName('canal_de_notificacoes')
+    .setName('configurar_canal_de_notificacoes')
     .setDescription('Configura o canal onde as notificações de aniversário serão enviadas')
     .addChannelOption(option =>
         option

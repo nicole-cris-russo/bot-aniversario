@@ -134,7 +134,7 @@ export class BirthdayChecker {
 
             // Verificar se há canal configurado
             if (!config.birthdayChannelId || !config.guildId) {
-                console.log('Nenhum canal de aniversários configurado. Use /canal_de_notificacoes para configurar.');
+                console.log('Nenhum canal de aniversários configurado. Use /configurar_canal_de_notificacoes para configurar.');
                 return;
             }
 
