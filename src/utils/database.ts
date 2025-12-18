@@ -1,6 +1,5 @@
-import Database from "@replit/database";
-
-const db = new Database();
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { join } from "path";
 
 // Interfaces
 export interface UserBirthday {
@@ -21,22 +20,47 @@ export interface BotConfig {
     guildId: string | null;
 }
 
-// Chaves do banco de dados
-const KEYS = {
-    BIRTHDAYS: "birthdays",
-    NOTIFICATIONS: "notifications",
-    CONFIG: "config",
-} as const;
+// Caminho para a pasta de dados
+const DATA_DIR = join(process.cwd(), "data");
+const BIRTHDAY_DB_PATH = join(DATA_DIR, "birthdays.json");
+const NOTIFICATION_DB_PATH = join(DATA_DIR, "notifications.json");
+const CONFIG_DB_PATH = join(DATA_DIR, "config.json");
+
+// Garantir que a pasta data existe
+function ensureDataDir() {
+    if (!existsSync(DATA_DIR)) {
+        mkdirSync(DATA_DIR, { recursive: true });
+    }
+}
+
+// Funções auxiliares para ler/escrever JSON
+function readJSON<T>(path: string, defaultValue: T): T {
+    ensureDataDir();
+    if (!existsSync(path)) {
+        writeFileSync(path, JSON.stringify(defaultValue, null, 2), "utf-8");
+        return defaultValue;
+    }
+    try {
+        const data = readFileSync(path, "utf-8");
+        return JSON.parse(data);
+    } catch (error) {
+        console.error(`Erro ao ler ${path}:`, error);
+        return defaultValue;
+    }
+}
+
+function writeJSON<T>(path: string, data: T): void {
+    ensureDataDir();
+    writeFileSync(path, JSON.stringify(data, null, 2), "utf-8");
+}
 
 // Funções para aniversários
 export async function getBirthdays(): Promise<UserBirthday[]> {
-    const result = await db.get(KEYS.BIRTHDAYS);
-    if (!result) return [];
-    return Array.isArray(result) ? result : [];
+    return readJSON<UserBirthday[]>(BIRTHDAY_DB_PATH, []);
 }
 
 export async function saveBirthdays(birthdays: UserBirthday[]): Promise<void> {
-    await db.set(KEYS.BIRTHDAYS, birthdays);
+    writeJSON(BIRTHDAY_DB_PATH, birthdays);
 }
 
 export async function addBirthday(birthday: UserBirthday): Promise<void> {
@@ -72,15 +96,13 @@ export async function getBirthdayByUserId(
 
 // Funções para notificações
 export async function getNotifications(): Promise<BirthdayNotification[]> {
-    const result = await db.get(KEYS.NOTIFICATIONS);
-    if (!result) return [];
-    return Array.isArray(result) ? result : [];
+    return readJSON<BirthdayNotification[]>(NOTIFICATION_DB_PATH, []);
 }
 
 export async function saveNotifications(
     notifications: BirthdayNotification[],
 ): Promise<void> {
-    await db.set(KEYS.NOTIFICATIONS, notifications);
+    writeJSON(NOTIFICATION_DB_PATH, notifications);
 }
 
 export async function updateNotification(
@@ -101,78 +123,71 @@ export async function updateNotification(
 
 // Funções para configuração
 export async function getConfig(): Promise<BotConfig> {
-    const result = await db.get(KEYS.CONFIG);
-    return (
-        result || {
-            birthdayChannelId: null,
-            guildId: null,
-        }
-    );
+    return readJSON<BotConfig>(CONFIG_DB_PATH, {
+        birthdayChannelId: null,
+        guildId: null,
+    });
 }
 
 export async function saveConfig(config: BotConfig): Promise<void> {
-    await db.set(KEYS.CONFIG, config);
+    writeJSON(CONFIG_DB_PATH, config);
 }
 
-// Função para migrar dados do JSON para o Replit Database
+// Função para migrar dados de data_/ para data/ (se necessário)
 export async function migrateFromJSON(): Promise<void> {
     try {
-        console.log(
-            "🔄 Iniciando migração de dados do JSON para o Replit Database...",
-        );
-
-        // Verificar se já existem dados no banco
+        ensureDataDir();
+        
+        // Verificar se já existem dados na pasta data/
         const existingBirthdays = await getBirthdays();
         const existingConfig = await getConfig();
 
         if (existingBirthdays.length > 0 || existingConfig.birthdayChannelId) {
-            console.log("ℹ️ Dados já existem no banco. Pulando migração.");
+            console.log("ℹ️ Dados já existem na pasta data/. Pulando migração.");
             return;
         }
 
-        // Importar fs dinamicamente para ESM
-        const { readFileSync, existsSync } = await import("fs");
-        const { join } = await import("path");
+        // Caminhos dos arquivos antigos em data_/
+        const { join: pathJoin } = await import("path");
+        const OLD_BIRTHDAY_DB_PATH = pathJoin(process.cwd(), "data_", "birthdays.json");
+        const OLD_NOTIFICATION_DB_PATH = pathJoin(process.cwd(), "data_", "notifications.json");
+        const OLD_CONFIG_DB_PATH = pathJoin(process.cwd(), "data_", "config.json");
 
-        const BIRTHDAY_DB_PATH = join(process.cwd(), "data", "birthdays.json");
-        const NOTIFICATION_DB_PATH = join(
-            process.cwd(),
-            "data",
-            "notifications.json",
-        );
-        const CONFIG_DB_PATH = join(process.cwd(), "data", "config.json");
+        console.log("🔄 Verificando migração de dados de data_/ para data/...");
 
         // Migrar aniversários
-        if (existsSync(BIRTHDAY_DB_PATH)) {
-            const birthdaysData = readFileSync(BIRTHDAY_DB_PATH, "utf-8");
+        if (existsSync(OLD_BIRTHDAY_DB_PATH)) {
+            const birthdaysData = readFileSync(OLD_BIRTHDAY_DB_PATH, "utf-8");
             const birthdays: UserBirthday[] = JSON.parse(birthdaysData);
-            await saveBirthdays(birthdays);
-            console.log(`✅ Migrados ${birthdays.length} aniversários`);
+            if (birthdays.length > 0) {
+                await saveBirthdays(birthdays);
+                console.log(`✅ Migrados ${birthdays.length} aniversários de data_/ para data/`);
+            }
         }
 
         // Migrar notificações
-        if (existsSync(NOTIFICATION_DB_PATH)) {
-            const notificationsData = readFileSync(
-                NOTIFICATION_DB_PATH,
-                "utf-8",
-            );
-            const notifications: BirthdayNotification[] =
-                JSON.parse(notificationsData);
-            await saveNotifications(notifications);
-            console.log(`✅ Migradas ${notifications.length} notificações`);
+        if (existsSync(OLD_NOTIFICATION_DB_PATH)) {
+            const notificationsData = readFileSync(OLD_NOTIFICATION_DB_PATH, "utf-8");
+            const notifications: BirthdayNotification[] = JSON.parse(notificationsData);
+            if (notifications.length > 0) {
+                await saveNotifications(notifications);
+                console.log(`✅ Migradas ${notifications.length} notificações de data_/ para data/`);
+            }
         }
 
         // Migrar configuração
-        if (existsSync(CONFIG_DB_PATH)) {
-            const configData = readFileSync(CONFIG_DB_PATH, "utf-8");
+        if (existsSync(OLD_CONFIG_DB_PATH)) {
+            const configData = readFileSync(OLD_CONFIG_DB_PATH, "utf-8");
             const config: BotConfig = JSON.parse(configData);
-            await saveConfig(config);
-            console.log("✅ Migrada configuração");
+            if (config.birthdayChannelId || config.guildId) {
+                await saveConfig(config);
+                console.log("✅ Migrada configuração de data_/ para data/");
+            }
         }
 
         console.log("✅ Migração concluída com sucesso!");
     } catch (error) {
         console.error("❌ Erro durante a migração:", error);
-        throw error;
+        // Não lançar erro, apenas logar - o bot pode continuar funcionando
     }
 }

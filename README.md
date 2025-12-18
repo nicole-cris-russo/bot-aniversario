@@ -33,8 +33,8 @@ npm install
 ```
 
 3. Configure as variáveis de ambiente:
-   - Copie `.env.example` para `.env`
-   - Adicione seu token do bot Discord no arquivo `.env`
+   - Crie um arquivo `.env` na raiz do projeto
+   - Adicione seu token do bot Discord: `TOKEN=seu_token_aqui`
 
 4. Compile o TypeScript:
 ```bash
@@ -123,13 +123,14 @@ bot-aniversario/
 │   └── index.ts               # Exportações dos comandos
 ├── src/
 │   └── index.ts               # Arquivo principal do bot
-├── data/                      # Banco de dados JSON (backup/migração)
-│   ├── birthdays.json         # Dados dos usuários (backup)
-│   ├── notifications.json     # Controle de notificações (backup)
-│   └── config.json            # Configuração do canal (backup)
+├── data/                      # Banco de dados JSON local
+│   ├── birthdays.json         # Dados dos usuários
+│   ├── notifications.json     # Controle de notificações
+│   └── config.json            # Configuração do canal
+├── data_/                     # Backup dos dados antigos (opcional)
 ├── src/
 │   └── utils/
-│       └── database.ts        # Utilitários do Replit Database
+│       └── database.ts        # Utilitários de banco de dados local (JSON)
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -137,19 +138,20 @@ bot-aniversario/
 
 ## 🔒 Banco de Dados
 
-O bot utiliza o **Replit Database** para armazenar dados de forma persistente e confiável:
-- **Aniversários**: Informações de aniversário dos usuários
-- **Notificações**: Controle de notificações enviadas
-- **Configuração**: Configuração do canal de aniversários
+O bot utiliza **arquivos JSON locais** para armazenar dados de forma persistente:
+- **Aniversários**: Informações de aniversário dos usuários (`data/birthdays.json`)
+- **Notificações**: Controle de notificações enviadas (`data/notifications.json`)
+- **Configuração**: Configuração do canal de aniversários (`data/config.json`)
 
 ### Migração Automática
-O bot automaticamente migra dados existentes dos arquivos JSON para o Replit Database na primeira execução. Os arquivos JSON originais são mantidos como backup.
+O bot automaticamente migra dados existentes da pasta `data_/` para a pasta `data/` na primeira execução (se necessário). Os arquivos na pasta `data_/` são mantidos como backup.
 
-### Vantagens do Replit Database
+### Armazenamento Local
+- ✅ Dados armazenados localmente em arquivos JSON
 - ✅ Persistência garantida mesmo após reinicializações
-- ✅ Acesso rápido e confiável aos dados
-- ✅ Sem necessidade de gerenciar arquivos locais
-- ✅ Ideal para ambientes de produção
+- ✅ Fácil backup (basta copiar a pasta `data/`)
+- ✅ Ideal para execução local
+- ✅ Sem dependências externas de banco de dados
 
 ## 🎨 Personalização
 

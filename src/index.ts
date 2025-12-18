@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Client, GatewayIntentBits, Collection, Events, REST, Routes } from 'discord.js';
 import { 
     registerBirthdayData, 
@@ -44,7 +45,7 @@ let birthdayChecker: BirthdayChecker;
 client.once(Events.ClientReady, async () => {
     console.log(`✅ Logged in as ${client.user?.tag}`);
     
-    // Migrar dados do JSON para o Replit Database
+    // Migrar dados de data_/ para data/ (se necessário)
     try {
         await migrateFromJSON();
     } catch (error) {

@@ -67,6 +67,9 @@ jspm_packages/
 .env
 .env.test
 
+# Local database files
+data/
+
 # parcel-bundler cache
 .cache
 .parcel-cache
@@ -154,3 +157,6 @@ typings/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# personal
+.cursorrules

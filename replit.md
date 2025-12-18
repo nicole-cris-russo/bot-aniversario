@@ -7,7 +7,7 @@ This is a Discord bot that helps manage birthday celebrations in Discord servers
 - **Language**: TypeScript
 - **Runtime**: Node.js with ES Modules
 - **Framework**: Discord.js v14
-- **Database**: JSON file-based storage
+- **Database**: JSON file-based storage (local)
 
 ## Features
 - Birthday registration and management
@@ -29,7 +29,7 @@ bot-aniversario/
 │       ├── setBirthdayChannel.ts
 │       ├── getBirthdayChannel.ts
 │       └── birthdayChecker.ts  # Automatic birthday checker
-├── data/                     # JSON database files
+├── data/                     # Local JSON database files
 │   ├── birthdays.json        # User birthday data
 │   ├── notifications.json    # Notification tracking
 │   └── config.json           # Bot configuration
@@ -46,7 +46,7 @@ bot-aniversario/
 
 ## Environment Setup
 - **TOKEN**: Discord bot token (required)
-- Configured via Replit Secrets
+- Configure via `.env` file in the project root
 
 ## Discord Bot Requirements
 The bot requires the following intents to be enabled in the Discord Developer Portal:
@@ -54,21 +54,23 @@ The bot requires the following intents to be enabled in the Discord Developer Po
 - Message Content Intent
 
 ## Running the Bot
-The bot runs automatically via the configured workflow using `npm run dev`.
+Run the bot locally using:
+```bash
+npm run dev
+```
 
 ## Recent Changes
-- 2025-10-28: Migração completa para Replit Database
-  - Migrado sistema de armazenamento de arquivos JSON para Replit Database
-  - Implementado sistema de migração automática de dados
-  - Removida dependência do dotenv (não necessária no Replit)
-  - Atualizado para usar tsx em vez de ts-node para melhor suporte ESM
-  - Bot está rodando com sucesso com todos os dados migrados
-  - Configurado workflow para inicialização automática do bot
+- 2025-01-XX: Migração para armazenamento local
+  - Migrado sistema de armazenamento do Replit Database para arquivos JSON locais
+  - Removida dependência do @replit/database
+  - Dados agora são armazenados na pasta `data/`
+  - Sistema de migração automática de `data_/` para `data/` (se necessário)
+  - Bot configurado para funcionar apenas localmente
 
 ## Database
-O bot agora utiliza o **Replit Database** (Key-Value Store) para armazenar:
-- Aniversários dos usuários (chave: `birthdays`)
-- Notificações enviadas (chave: `notifications`)
-- Configurações do bot (chave: `config`)
+O bot agora utiliza **arquivos JSON locais** na pasta `data/` para armazenar:
+- Aniversários dos usuários (`birthdays.json`)
+- Notificações enviadas (`notifications.json`)
+- Configurações do bot (`config.json`)
 
-A migração dos arquivos JSON antigos para o Replit Database acontece automaticamente na primeira execução.
+A migração dos arquivos da pasta `data_/` para `data/` acontece automaticamente na primeira execução (se necessário).
